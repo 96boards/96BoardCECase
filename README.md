@@ -16,8 +16,8 @@ here and make up custome cases for that combination.
 So to install 96BoardCECase.scad you need to do the following:
 
  Make sure you have the latest copy of OpenScad installed
-**$ git clone https://github.com/96Boards/96BoardsCECase.git**  
-**$ $cd 96BoardsCECase
+**$ git clone https://github.com/96Boards/96BoardCECase.git**  
+**$ $cd 96BoardCECase
  Start OpenSCAD and open the file 96BoardCECase.scad in the editor 
 
 The code so far has been tested with a flat case,  a curved rectangular 
