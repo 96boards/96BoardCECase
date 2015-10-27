@@ -2,15 +2,20 @@
 ##Overview  
 
 This is a quick case designed in OpenScad for 96Boards CE standard.  
-There are lots of options most are generally set by tre or false.  It 
+There are lots of options most are generally set by true or false.  It 
 can output a case for the normal size or the expanded size CE bosard.
 It currently supports adding a UART board within the case.  And it allows 
 you to expose the low or high speed connectors. 
 
+The only thing you need to download is the 96BoardCECase.scad file, the
+.stl files are 3D print file examples of what the cases could look like.  
+Or if the sample cases are exactly what you need you can download them 
+directly.
+
 One of the cool things about the 96Boards CE project is that all of the
 boards us the same pins for the Low Speed Expansion Connector so you can
 plug any expansion board into any 96Board.  We can add the expansion board
-here and make up custome cases for that combination.
+here and make up custome case for that combination.
 
 ##Install the source code  
 So to install 96BoardCECase.scad you need to do the following:

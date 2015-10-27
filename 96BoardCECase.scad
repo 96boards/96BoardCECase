@@ -47,7 +47,7 @@ case_wall_thickness = 2.5;
 expose_UART_Board_Button = true;
 
 // expose the low/high speed connectors or not true/false question
-expose_low_speed_connector = false;
+expose_low_speed_connector = true;
 expose_high_speed_connector = false;
 
 // Do I want screw holes through the case? true/false question
@@ -61,7 +61,7 @@ screw_terminator = true;
 // The board will fit into the bottom of the case cleanly and the top will sit on it
 slice = true;
 // top of the box or bottom 
-slice_top = false;
+slice_top = true;
 
 // How round do you want holes  the higer it set to the longer it takes to render
 smoothness = 50; //10-100
