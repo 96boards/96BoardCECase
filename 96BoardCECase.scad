@@ -41,7 +41,7 @@ case_wall_thickness = 2.5;
 96Boards_CE_extended_version = false;
 
 // Do you hvave a UART board and want room to install it in the case?
-96Board_UART_Board_Installed = false;
+96Board_UART_Board_Installed = true;
 
 // The UART board has a reset button, if you want to be able to press it true
 expose_UART_Board_Button = true;
@@ -49,6 +49,7 @@ expose_UART_Board_Button = true;
 // expose the low/high speed connectors or not true/false question
 expose_low_speed_connector = true;
 expose_high_speed_connector = false;
+expose_DragonBoardDipSwitch = true;
 
 // Do I want screw holes through the case? true/false question
 screw_holes = true;
@@ -61,7 +62,7 @@ screw_terminator = true;
 // The board will fit into the bottom of the case cleanly and the top will sit on it
 slice = true;
 // top of the box or bottom 
-slice_top = true;
+slice_top = false;
 
 // How round do you want holes  the higer it set to the longer it takes to render
 smoothness = 50; //10-100
@@ -69,7 +70,7 @@ smoothness = 50; //10-100
 // For development only do you want to see the full case, the full diff model or the bare board model can help when adding new case type
 // Set true for final case, false shows you the board and screw layout
 case = true;
-96BoardBlock = true;
+96BoardBlock = false;
 
 // UART Board dimensions
 uart_board_length = 41.00;
@@ -112,6 +113,12 @@ low_speed_connector_thickness = 4.6;
 high_speed_connector_length = 32.00;
 high_speed_connector_width = 7.50;
 
+DragonBoardDipSwitch_width = 6.30;
+DragonBoardDipSwitch_length = 5.80;
+DragonBoardDipSwitch_offset = 4.82;
+DragonBoardDipSwitch_y_offset = 5.75;
+DragonBoardDipSwitch_z_offset = -3.5;
+
 // Safe cutout distance.  Things that cut holes must extand past the edge it's cutting
 cutout = .5;
 
@@ -136,6 +143,7 @@ bd_width = (96Boards_CE_extended_version == true?board_width_ext:board_width_reg
 // How tall is the board, normal or extended for the UART board?
 bd_total_thickness = (96Board_UART_Board_Installed == false)?total_thickness:total_thickness+(uart_board_total_thickness-(board_top_clearence-low_speed_connector_thickness));
 bd_top_clearence = (96Board_UART_Board_Installed == false)?board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance:board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance+(uart_board_total_thickness - (board_top_clearence-low_speed_connector_thickness));
+bd_bottom_clearence = board_bottom_clearence+CE_spec_tolerance;
 board_back_edge = bd_width - 1;
 
 usb_host1_offset = 76.00;
@@ -185,12 +193,12 @@ nut_size = 4.00;
 
 // Modules
 module slice_top(){
-    translate([-1 * (cutout/2),-1 * (cutout/2),case_wall_thickness+board_top_surface])
+    translate([-1 * (cutout/2),-1 * (cutout/2),case_wall_thickness+board_top_surface-.001])
     cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+bd_top_clearence+cutout]);
 }
 module slice_bottom(){
     translate([-1 * (cutout/2),-1 * (cutout/2),-1 * cutout])
-    // Something is slightly wrong here, had to add .001 to the size of the cube to cut everything as needed.
+    // Something is slightly wrong here, had to add .001 to the size of the cube to cut everything as needed.  Rounding error?
     // Should not need the extra .001
     cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+board_top_surface+cutout+.001]);
 }
@@ -331,6 +339,13 @@ module 96BoardBare(penetration){
                 bd_top_clearence, high_speed_connector_center_offset-(high_speed_connector_width/2), board_top_surface, false);
             }
             
+            // DragonBoardDipSwitch
+            if (expose_DragonBoardDipSwitch == true){
+                color("Fuchsia")
+                face_penetration(DragonBoardDipSwitch_offset, DragonBoardDipSwitch_length, DragonBoardDipSwitch_width,
+                bd_bottom_clearence, DragonBoardDipSwitch_y_offset, DragonBoardDipSwitch_z_offset, false);//-3.25
+            }
+            
             //UART_Board_Connector
             if (96Board_UART_Board_Installed == true && 96Boards_CE_extended_version == false){
                 color( "DarkOliveGreen" )
@@ -340,7 +355,7 @@ module 96BoardBare(penetration){
             
             // UART_Board_Button
             if (expose_UART_Board_Button == true && 96Board_UART_Board_Installed == true){
-                color(DodgerBlue)
+                color("DodgerBlue")
                 translate([uart_board_button_x_offset, uart_board_button_center_y_offset, uart_board_top_surface])
                 cylinder((bd_total_thickness+case_wall_thickness+cutout)-uart_board_top_surface, d=hole_size, $fn=smoothness);
             }
