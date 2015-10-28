@@ -62,7 +62,7 @@ screw_terminator = true;
 // The board will fit into the bottom of the case cleanly and the top will sit on it
 slice = true;
 // top of the box or bottom 
-slice_top = false;
+slice_top = true;
 
 // How round do you want holes  the higer it set to the longer it takes to render
 smoothness = 50; //10-100
@@ -98,7 +98,7 @@ hdmi_length = 15.20;
 hdmi_width = 9.20;
 hdmi_thickness = 6;
 
-microSD_length = 15.00;
+microSD_length = 15.20;
 microSD_width = 15.00;
 microSD_thickness = 1.30;
 
@@ -113,10 +113,10 @@ low_speed_connector_thickness = 4.6;
 high_speed_connector_length = 32.00;
 high_speed_connector_width = 7.50;
 
-DragonBoardDipSwitch_width = 6.30;
-DragonBoardDipSwitch_length = 5.80;
+DragonBoardDipSwitch_width = 6.50;
+DragonBoardDipSwitch_length = 6.00;
 DragonBoardDipSwitch_offset = 4.82;
-DragonBoardDipSwitch_y_offset = 5.75;
+DragonBoardDipSwitch_y_offset = 5.65;
 DragonBoardDipSwitch_z_offset = -3.5;
 
 // Safe cutout distance.  Things that cut holes must extand past the edge it's cutting
@@ -145,13 +145,17 @@ bd_total_thickness = (96Board_UART_Board_Installed == false)?total_thickness:tot
 bd_top_clearence = (96Board_UART_Board_Installed == false)?board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance:board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance+(uart_board_total_thickness - (board_top_clearence-low_speed_connector_thickness));
 bd_bottom_clearence = board_bottom_clearence+CE_spec_tolerance;
 board_back_edge = bd_width - 1;
+// Sometimes the front edge connectors extend out beyond the board and have edges that catch on the bottom case.
+// So we will sink the connector models this much into the case, and make them this much taller so we have a larger hole
+// for the connectors allowing for any manufacturing tolerance issues.
+front_connector_tolerance_z_drop = .4;
 
 usb_host1_offset = 76.00;
 usb_host2_offset = 56.60;
 usb_otg3_offset = 41.60;
 hdmi_offset = 25.00;
-microSD_offset = 8;
-DC_pwr_offset = 71.5;
+microSD_offset = 7.8;
+DC_pwr_offset = 72.00;
 uart_board_connector_offset = 14.00;
 
 low_speed_connector_center_offset = 50.00;
@@ -220,8 +224,14 @@ module face_penetration(x_location, length, width , thickness, y_location, z_loc
     // if y_location is 0 or exactly the full board width we are sticking things out the sides
     // 0 based so take 1 from bd_width
     if (y_location == 0 || y_location == (bd_width-1) ){
-        translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location])
+        if (y_location == 0) {
+        translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location-front_connector_tolerance_z_drop])
+        cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness+front_connector_tolerance_z_drop],center );
+        } else if (y_location == (bd_width-1) ){
+            translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location])
         cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness],center );
+        }
+        //cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness],center );
     }
     // if we are not sticking out the sides we must be sticking out the top though we could be cuttout the bottom too.
     else {

@@ -7,6 +7,13 @@ can output a case for the normal size or the expanded size CE bosard.
 It currently supports adding a UART board within the case.  And it allows 
 you to expose the low or high speed connectors. 
 
+You may need to adjust the CE_spec_tolerance variable depending on your 3D
+printer.  This design was tested on an M3D micro printer and it generall
+fits the boards pretty well.  A couple of items were noted with the
+DragonBoard 410c and corrected (I hope).  And it's clear that sometimes
+parts shift when the board is being made, so I've tried to make allowences
+for that too.
+
 The only thing you need to download is the 96BoardCECase.scad file, the
 .stl files are 3D print file examples of what the cases could look like.  
 Or if the sample cases are exactly what you need you can download them 
@@ -14,8 +21,73 @@ directly.
 
 One of the cool things about the 96Boards CE project is that all of the
 boards us the same pins for the Low Speed Expansion Connector so you can
-plug any expansion board into any 96Board.  We can add the expansion board
-here and make up custome case for that combination.
+plug any expansion board into any 96Board.  We can add the expansion boards
+here and make up custom case for that combination.
+
+There are a BUNCH of true/false variables that can be selected and a couple
+of numeric variables too, Extracted from the code:
+
+// Square edge case or rounded edge case?
+rounded_case = true;
+// Only the retangle of the case rounded (sides) or all angles (top, bottom,
+// sides)  
+only_retangle_rounded = false;
+
+// How thick do you want your case walls(in mm)// Square edge case or
+// rounded edge case?
+rounded_case = true;
+// Only the retangle of the case rounded (sides) or all angles (top, bottom,
+// sides)  
+only_retangle_rounded = false;
+
+// How thick do you want your case walls(in mm)  Be careful if you are
+// setting rounded_case true, too thin of walls will leave holes Don't go to
+// thick (much over 2.5) or you will have problems plugging in cables, so
+// really the range is about 2.00mm - 2.50mm at least for me.
+case_wall_thickness = 2.5;
+
+// Extended board or reqular true/false question, there are no extended
+// boards at this time (Oct 2015) but when there are we are ready.
+96Boards_CE_extended_version = false;
+
+// Do you hvave a UART board and want room to install it in the case?
+96Board_UART_Board_Installed = true;
+
+// The UART board has a reset button, if you want to be able to press it
+// true
+expose_UART_Board_Button = true;
+
+// expose the low/high speed connectors or not true/false question
+expose_low_speed_connector = true;
+expose_high_speed_connector = false;
+
+// The dragonboard 410c has 4 DIP switches on the bottom, true will make a
+// hole so you can reach them without opening the case.
+expose_DragonBoardDipSwitch = true;
+
+// Do I want screw holes through the case? true/false question
+screw_holes = true;
+
+// Do I want nut holes on the bottom 
+screw_terminator = true;
+
+// For exporting .stl models, this will cut the model in 1/2 at the board
+// top level.  The board will fit into the bottom of the case cleanly and
+// the top will sit on it
+slice = true;
+
+// top of the box or bottom 
+slice_top = true;
+
+// How round do you want holes  the higer it set to the longer it takes to
+// render, at 50 it takes 2-3 minutes to render the model
+smoothness = 50; //10-100
+
+// For development only. Do you want to see the full case, the full diff
+// model or the bare board model can help when adding new case type
+// Set true for final case, false shows you the board and screw layout
+case = true;
+96BoardBlock = false;
 
 ##Install the source code  
 So to install 96BoardCECase.scad you need to do the following:
