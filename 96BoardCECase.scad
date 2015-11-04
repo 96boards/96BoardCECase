@@ -29,18 +29,18 @@ use <MCAD/boxes.scad>
 
 // Square edge case or rounded edge case?
 rounded_case = true;
-// Only the retangle of the case rounded (sides) or all angles (top, bottom, sides)  
-only_retangle_rounded = false;
+// Only the rectangle of the case rounded (sides) or all angles (top, bottom, sides)  
+only_rectangle_rounded = false;
 
 // How thick do you want your case walls(in mm)
 // Be careful if you are setting rounded_case true, too thin of walls will leave holes
 // Don't go to thick (much over 2.5) or you will have problems plugging in cables
 case_wall_thickness = 2.5;
 
-// Extended board or reqular true/false question
+// Extended board or regular true/false question
 96Boards_CE_extended_version = false;
 
-// Do you hvave a UART board and want room to install it in the case?
+// Do you have a UART board and want room to install it in the case?
 96Board_UART_Board_Installed = true;
 
 // The UART board has a reset button, if you want to be able to press it true
@@ -53,18 +53,27 @@ expose_DragonBoardDipSwitch = true;
 
 // Do I want screw holes through the case? true/false question
 screw_holes = true;
-// Do I only want screw holes on the top of the case and no nuts on the botton, can thread screws into the standoffs --- Need to add code for this
+// Do I only want screw holes on the top of the case and no nuts on the bottom, can thread screws into the standoffs --- Need to add code for this
 screw_holes_top_only = false;
 // Do I want nut holes on the bottom 
 screw_terminator = true;
 
 // For exporting .stl models, this will cut the model in 1/2 at the board top level.
 // The board will fit into the bottom of the case cleanly and the top will sit on it
-slice = true;
+slice = false;
 // top of the box or bottom 
 slice_top = false;
 
-// How round do you want holes  the higer it set to the longer it takes to render
+// turns out each 3D printer prints a little differently and that can make a board not fit the case
+// so to be safe print out a 85x54x5 rectangle or a 100x85x5 rectangle depending on what size case 
+// you are making and then measure it with a digital caliper calculate the % big or small for each 
+// dimension and add it here. 1 is no scaling at all.  It is entirely possible to have negative scaling 
+// 99.8 vs positive scaling 1.03 for each direction each printer has it's own thing.
+x_scaler = 1;
+y_scaler = 1;
+z_scaler = 1;
+
+// How round do you want holes  the higher it set to the longer it takes to render
 smoothness = 50; //10-100
 
 // For development only do you want to see the full case, the full diff model or the bare board model can help when adding new case type
@@ -119,7 +128,8 @@ DragonBoardDipSwitch_offset = 4.82;
 DragonBoardDipSwitch_y_offset = 5.65;
 DragonBoardDipSwitch_z_offset = -3.5;
 
-// Safe cutout distance.  Things that cut holes must extand past the edge it's cutting
+// Safe cutout distance.  Things that cut holes must extend past the edge it's cutting
+// So odd thing with OpenSCAD, if you don't you can get bad stl files.
 cutout = .5;
 
 // All board measurements and offsets set by 96Boards CE specification
@@ -131,19 +141,19 @@ CE_spec_tolerance = 0.30;
 board_length = 85.00;
 total_thickness = 12;
 board_thickness = 1.6;
-board_top_clearence = 7;
+board_top_clearance = 7;
 // Some of the USB connectors take up too much room so add extra room if needed
 // The first version of the HiKey the USB connectors were 7.46 high
-board_top_clearence_extra_tolerance = .46;   
-board_bottom_clearence = 3.4;
+board_top_clearance_extra_tolerance = .46;   
+board_bottom_clearance = 3.4;
 board_top_surface =5;
 board_front_edge = 0;
 // How wide is the board, normal or extended
 bd_width = (96Boards_CE_extended_version == true?board_width_ext:board_width_reg);
 // How tall is the board, normal or extended for the UART board?
-bd_total_thickness = (96Board_UART_Board_Installed == false)?total_thickness:total_thickness+(uart_board_total_thickness-(board_top_clearence-low_speed_connector_thickness));
-bd_top_clearence = (96Board_UART_Board_Installed == false)?board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance:board_top_clearence+board_top_clearence_extra_tolerance+CE_spec_tolerance+(uart_board_total_thickness - (board_top_clearence-low_speed_connector_thickness));
-bd_bottom_clearence = board_bottom_clearence+CE_spec_tolerance;
+bd_total_thickness = (96Board_UART_Board_Installed == false)?total_thickness:total_thickness+(uart_board_total_thickness-(board_top_clearance-low_speed_connector_thickness));
+bd_top_clearance = (96Board_UART_Board_Installed == false)?board_top_clearance+board_top_clearance_extra_tolerance+CE_spec_tolerance:board_top_clearance+board_top_clearance_extra_tolerance+CE_spec_tolerance+(uart_board_total_thickness - (board_top_clearance-low_speed_connector_thickness));
+bd_bottom_clearance = board_bottom_clearance+CE_spec_tolerance;
 board_back_edge = bd_width - 1;
 // Sometimes the front edge connectors extend out beyond the board and have edges that catch on the bottom case.
 // So we will sink the connector models this much into the case, and make them this much taller so we have a larger hole
@@ -180,7 +190,7 @@ mount_hole_5_y = 96.00;
 mount_hole_6_x = 81.00;
 mount_hole_6_y = 96.00;
 
-// Need this to be oversized as holes are undsized
+// Need this to be oversized as holes are undersized
 hole_size = 2.8;
 hole_keepout = 4.5;
 
@@ -198,7 +208,7 @@ nut_size = 4.00;
 // Modules
 module slice_top(){
     translate([-1 * (cutout/2),-1 * (cutout/2),case_wall_thickness+board_top_surface-.001])
-    cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+bd_top_clearence+cutout]);
+    cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+bd_top_clearance+cutout]);
 }
 module slice_bottom(){
     translate([-1 * (cutout/2),-1 * (cutout/2),-1 * cutout])
@@ -218,29 +228,32 @@ module 96BoardStandoffMounts(){
     }
 }
 // The way this works is we stick out what we want to diff away
-module face_penetration(x_location, length, width , thickness, y_location, z_location, center){
-    // Since this makes a model to diff from the external case have to add extra length to fully penatrate
+// module face_penetration(x_location, length, width , thickness, y_location, z_location, center){
+module face_penetration(face, x_location, y_location, z_location, length, width , thickness, center){
+    // Since this makes a model to diff from the external case have to add extra length to fully penetrate
     // the case
-    // if y_location is 0 or exactly the full board width we are sticking things out the sides
-    // 0 based so take 1 from bd_width
-    if (y_location == 0 || y_location == (bd_width-1) ){
-        if (y_location == 0) {
+    if (face == "FR"){ // FRont face
         translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location-front_connector_tolerance_z_drop])
         cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness+front_connector_tolerance_z_drop],center );
-        } else if (y_location == (bd_width-1) ){
-            translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location])
+    }else if (face == "BA"){ // BAck face
+        translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location])
         cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness],center );
-        }
-        //cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness],center );
-    }
-    // if we are not sticking out the sides we must be sticking out the top though we could be cuttout the bottom too.
-    else {
+    }else if (face == "LS"){ // Left Side face
+        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
+        cube([length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness],center );
+    }else if (face == "RS"){ // Right Side face
+        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
+        cube([length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness],center );
+    }else if (face == "TO"){ // TOp face
         translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
         cube([length+CE_spec_tolerance,width+CE_spec_tolerance,thickness+case_wall_thickness+cutout],center );
+    }else { // BOttom face
+        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
+        cube([length+CE_spec_tolerance,width,thickness+case_wall_thickness+cutout],center );
     }
 }
 module 96BoardMountHoles(penetration){
-    z_loc = (penetration == true)?-1*(case_wall_thickness+(CE_spec_tolerance/2)+(board_top_clearence_extra_tolerance/2)+cutout+.01):0;
+    z_loc = (penetration == true)?-1*(case_wall_thickness+(CE_spec_tolerance/2)+(board_top_clearance_extra_tolerance/2)+cutout+.01):0;
 
     96BoardMountHole(mount_hole_1_x+(CE_spec_tolerance/2),mount_hole_1_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
     96BoardMountHole(mount_hole_2_x+(CE_spec_tolerance/2),mount_hole_2_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
@@ -257,12 +270,12 @@ module 96BoardMountHole(x_location, y_location, z_location, size, penetration ){
 }
 
 module mount_cylinder(x_location, y_location, z_location, size, penetration){
-    // Since this makes a model to diff from the external case have to add extra length to fully penatrate
+    // Since this makes a model to diff from the external case have to add extra length to fully penetrate
     // the case
     union() {
         color("green")
         translate([x_location, y_location, z_location])
-        cylinder(penetration != true?bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance:bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance+(case_wall_thickness*2)+cutout, d = size, false, $fn=smoothness);
+        cylinder(penetration != true?bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance:bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)+cutout, d = size, false, $fn=smoothness);
         if (screw_terminator == true && penetration == true){
             color("Indigo")
             translate([x_location,y_location,z_location])
@@ -273,10 +286,10 @@ module mount_cylinder(x_location, y_location, z_location, size, penetration){
         }
         if (screw_taper == true && penetration == true) {
             color("Indigo")
-            translate([x_location,y_location,((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance)-screw_taper_height)])
+            translate([x_location,y_location,((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)-screw_taper_height)])
             cylinder(screw_taper_height, r1=(size/2), r2=(size/2)+1.5, $fn=smoothness);  // screw taper
             color("red")
-            translate([x_location,y_location,bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance])
+            translate([x_location,y_location,bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance])
             cylinder(cutout, r1=(size/2)+1.5, r2=(size/2)+1.5, $fn=smoothness);
     
         }
@@ -285,21 +298,21 @@ module mount_cylinder(x_location, y_location, z_location, size, penetration){
 module 96BoardOuterCase(){
     if (rounded_case != true){
         translate(0,0,0);
-        cube([board_length+CE_spec_tolerance+(case_wall_thickness*2),bd_width+CE_spec_tolerance+(case_wall_thickness*2),bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance+(case_wall_thickness*2)],false);
+        cube([board_length+CE_spec_tolerance+(case_wall_thickness*2),bd_width+CE_spec_tolerance+(case_wall_thickness*2),bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)],false);
     } else {
         translate([(board_length+CE_spec_tolerance+(case_wall_thickness*2))/2,((bd_width+CE_spec_tolerance+(case_wall_thickness*2))/2),((bd_total_thickness+(case_wall_thickness*2))/2)])
-        roundedBox([board_length+CE_spec_tolerance+(case_wall_thickness*2), bd_width+CE_spec_tolerance+(case_wall_thickness*2), bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance+(case_wall_thickness*2)], 5, only_retangle_rounded, $fn=smoothness);
+        roundedBox([board_length+CE_spec_tolerance+(case_wall_thickness*2), bd_width+CE_spec_tolerance+(case_wall_thickness*2), bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)], 5, only_rectangle_rounded, $fn=smoothness);
     }
 } 
 module 96BoardBlock(penetration){
     96BoardBare(penetration);
     // Total footprint space consumed by 96Board
     difference() {
-        cube([board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance],false);
+        cube([board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance],false);
         96BoardStandoffMounts();
         };
       // This will cut the 96Board logo in the case top, not really useful as the centers of letters will just fall in.       
-//    translate([40, 25,bd_total_thickness+CE_spec_tolerance+board_top_clearence_extra_tolerance+(case_wall_thickness*2)])
+//    translate([40, 25,bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)])
 //    96BoardsLogo(8);
 }
 
@@ -307,63 +320,63 @@ module 96BoardBare(penetration){
     // 96CE Board with connectors on it that stick out far enough to subtract from a case black
     union() {
         color( "orange" )
-        translate([0,0,board_bottom_clearence])
+        translate([0,0,board_bottom_clearance])
         cube([board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,board_thickness],false);
         translate([0,0,0]){    
             // USB_Host_Connectors
             color( "DarkTurquoise" )
-            face_penetration(usb_host1_offset, usb_host_length, usb_host_width, 
-            usb_host_thickness, board_front_edge,board_top_surface, false);
+            face_penetration("FR", usb_host1_offset, board_front_edge,board_top_surface, usb_host_length, usb_host_width, 
+            usb_host_thickness, false);
             color( "DarkTurquoise" )
-            face_penetration(usb_host2_offset, usb_host_length, usb_host_width, 
-            usb_host_thickness, board_front_edge, board_top_surface, false);
+            face_penetration("FR", usb_host2_offset, board_front_edge, board_top_surface, usb_host_length, usb_host_width, 
+            usb_host_thickness, false);
 
             // USB_OTG_Connector
             color( "cyan" )
-            face_penetration(usb_otg3_offset, usb_otg_length, usb_otg_width, 
-            usb_otg_thickness, board_front_edge, board_top_surface, false);
+            face_penetration("FR", usb_otg3_offset, board_front_edge, board_top_surface, usb_otg_length, usb_otg_width, 
+            usb_otg_thickness, false);
 
             // HDMI_Connector
             color( "blue" )
-            face_penetration(hdmi_offset, hdmi_length, hdmi_width,
-            hdmi_thickness, board_front_edge, board_top_surface, false);
+            face_penetration("FR", hdmi_offset, board_front_edge, board_top_surface, hdmi_length, hdmi_width,
+            hdmi_thickness, false);
             
             //microSD_Connector
             color( "green" )
-            face_penetration(microSD_offset, microSD_length, microSD_width, 
-            microSD_thickness, board_front_edge, board_top_surface, false);
+            face_penetration("FR", microSD_offset, board_front_edge, board_top_surface, microSD_length, microSD_width, 
+            microSD_thickness, false);
             
             // DC_pwr_Connector
             color( "lightgreen" )
-            face_penetration(DC_pwr_offset, DC_pwr_length, DC_pwr_width, 
-            DC_pwr_thickness, board_back_edge, board_top_surface, false);
+            face_penetration("BA", DC_pwr_offset, board_back_edge, board_top_surface, DC_pwr_length, DC_pwr_width, 
+            DC_pwr_thickness, false);
             
             //Low_Speed_Connector
             if (expose_low_speed_connector == true ){
                 color("Indigo")
-                face_penetration(low_speed_connector_left_offset, low_speed_connector_length, low_speed_connector_width, 
-                bd_top_clearence, low_speed_connector_center_offset-(low_speed_connector_width/2), board_top_surface, false);
+                face_penetration("TO", low_speed_connector_left_offset, low_speed_connector_center_offset-(low_speed_connector_width/2), board_top_surface, low_speed_connector_length, low_speed_connector_width, 
+                bd_top_clearance, false);
             }
             
             // High_Speed_Connector
             if (expose_high_speed_connector == true ){
                 color("Indigo")
-                face_penetration(high_speed_connector_left_offset, high_speed_connector_length,high_speed_connector_width, 
-                bd_top_clearence, high_speed_connector_center_offset-(high_speed_connector_width/2), board_top_surface, false);
+                face_penetration("TO", high_speed_connector_left_offset, high_speed_connector_center_offset-(high_speed_connector_width/2), board_top_surface, high_speed_connector_length,high_speed_connector_width, 
+                bd_top_clearance, false);
             }
             
             // DragonBoardDipSwitch
             if (expose_DragonBoardDipSwitch == true){
                 color("Fuchsia")
-                face_penetration(DragonBoardDipSwitch_offset, DragonBoardDipSwitch_length, DragonBoardDipSwitch_width,
-                bd_bottom_clearence, DragonBoardDipSwitch_y_offset, DragonBoardDipSwitch_z_offset, false);//-3.25
+                face_penetration("BO", DragonBoardDipSwitch_offset, DragonBoardDipSwitch_y_offset, DragonBoardDipSwitch_z_offset, DragonBoardDipSwitch_length, DragonBoardDipSwitch_width,
+                bd_bottom_clearance, false);//-3.25
             }
             
             //UART_Board_Connector
             if (96Board_UART_Board_Installed == true && 96Boards_CE_extended_version == false){
                 color( "DarkOliveGreen" )
-                face_penetration(uart_board_connector_offset, uart_board_connector_length, uart_board_connector_width,
-                uart_board_connector_thickness, board_back_edge, uart_board_top_surface, false);
+                face_penetration("BA", uart_board_connector_offset, board_back_edge, uart_board_top_surface, uart_board_connector_length, uart_board_connector_width,
+                uart_board_connector_thickness, false);
             }
             
             // UART_Board_Button
@@ -401,6 +414,11 @@ if (case == true ){
         96BoardBlock(screw_holes);
     }
 }
+
+
+
+// WARNING WARNING WARNING the code below here was auto-generated to 
+// generate the 96Boards Logo
 // keep the resulting .stl file manifold.
 fudge = 0.1;
 
@@ -408,6 +426,11 @@ module 96BoardsLogo(h)
 {
   scale([.1, .1, 1]) color("red") rotate(a=[180,0,0]) union()
   {
+// WARNING WARNING WARNING the code below here was auto-generated to 
+// generate the 96Boards Logo, don't mess with it unless you are an
+// OpenSCAD Expert.  If you want to change the size, use the scale 
+// command just above this comment.  The hight is passed in as part 
+// of the module call.
     difference()
     {
        linear_extrude(height=h)
