@@ -41,12 +41,12 @@ case_wall_thickness = 2.5;
 96Boards_CE_extended_version = false;
 
 // Do you have a UART board and want room to install it in the case?
-96Board_UART_Board_Installed = true;
+96Board_UART_Board_Installed = true; 
 
 // The UART board has a reset button, if you want to be able to press it true
 expose_UART_Board_Button = true;
 
-// expose the low/high speed connectors or not true/false question
+// expose the low/high speeo0id connectors or not true/false question
 expose_low_speed_connector = true;
 expose_high_speed_connector = false;
 expose_DragonBoardDipSwitch = true;
@@ -62,16 +62,18 @@ screw_terminator = true;
 // The board will fit into the bottom of the case cleanly and the top will sit on it
 slice = false;
 // top of the box or bottom 
-slice_top = false;
+slice_top = true;
 
 // turns out each 3D printer prints a little differently and that can make a board not fit the case
 // so to be safe print out a 85x54x5 rectangle or a 100x85x5 rectangle depending on what size case 
 // you are making and then measure it with a digital caliper calculate the % big or small for each 
 // dimension and add it here. 1 is no scaling at all.  It is entirely possible to have negative scaling 
-// 99.8 vs positive scaling 1.03 for each direction each printer has it's own thing.
-x_scaler = 1;
-y_scaler = 1;
-z_scaler = 1;
+// .998 vs positive scaling 1.03 for each direction each printer has it's own thing.
+// If the case is bigger then it needs to be but the board fits I'd leave it alonw, this is really needed
+// if the case is too small
+x_scaler = 1.0;
+y_scaler = 1.0;
+z_scaler = 1.0;
 
 // How round do you want holes  the higher it set to the longer it takes to render
 smoothness = 50; //10-100
@@ -137,7 +139,7 @@ cutout = .5;
 // All measurements are from lower left corner by microSD area.
 board_width_reg = 54.00;
 board_width_ext = 100.00;
-CE_spec_tolerance = 0.30;
+CE_spec_tolerance = 0.25;
 board_length = 85.00;
 total_thickness = 12;
 board_thickness = 1.6;
@@ -207,14 +209,14 @@ nut_size = 4.00;
 
 // Modules
 module slice_top(){
-    translate([-1 * (cutout/2),-1 * (cutout/2),case_wall_thickness+board_top_surface-.001])
-    cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+bd_top_clearance+cutout]);
+    draw_cube(-1 * (cutout/2),-1 * (cutout/2),case_wall_thickness+board_top_surface-.001,
+    board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+bd_top_clearance+cutout);
 }
 module slice_bottom(){
-    translate([-1 * (cutout/2),-1 * (cutout/2),-1 * cutout])
     // Something is slightly wrong here, had to add .001 to the size of the cube to cut everything as needed.  Rounding error?
     // Should not need the extra .001
-    cube([board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+board_top_surface+cutout+.001]);
+    draw_cube(-1 * (cutout/2),-1 * (cutout/2),-1 * cutout,
+    board_length+CE_spec_tolerance+(case_wall_thickness*2)+cutout, bd_width+CE_spec_tolerance+(case_wall_thickness*2)+cutout,case_wall_thickness+board_top_surface+cutout+.001);
 }
 
 module 96BoardStandoffMounts(){
@@ -233,82 +235,82 @@ module face_penetration(face, x_location, y_location, z_location, length, width 
     // Since this makes a model to diff from the external case have to add extra length to fully penetrate
     // the case
     if (face == "FR"){ // FRont face
-        translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location-front_connector_tolerance_z_drop])
-        cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness+front_connector_tolerance_z_drop],center );
+        draw_cube((x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location-front_connector_tolerance_z_drop,
+        length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness+front_connector_tolerance_z_drop,center );
     }else if (face == "BA"){ // BAck face
-        translate([(x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location])
-        cube([length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness],center );
+        draw_cube((x_location+(CE_spec_tolerance/2))-(length/2),y_location == 0? -1*(y_location+(CE_spec_tolerance/2)+case_wall_thickness+cutout):((y_location+(CE_spec_tolerance/2))-width)+case_wall_thickness,z_location,
+        length+CE_spec_tolerance,width+case_wall_thickness+cutout,thickness,center );
     }else if (face == "LS"){ // Left Side face
-        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
-        cube([length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness],center );
+        draw_cube(x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location,
+        length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness,center );
     }else if (face == "RS"){ // Right Side face
-        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
-        cube([length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness],center );
+        draw_cube(x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location,
+        length+CE_spec_tolerance+case_wall_thickness+cutout,width+CE_spec_tolerance,thickness,center );
     }else if (face == "TO"){ // TOp face
-        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
-        cube([length+CE_spec_tolerance,width+CE_spec_tolerance,thickness+case_wall_thickness+cutout],center );
+        draw_cube(x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location,
+        length+CE_spec_tolerance,width+CE_spec_tolerance,thickness+case_wall_thickness+cutout,center );
     }else { // BOttom face
-        translate([x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location])
-        cube([length+CE_spec_tolerance,width,thickness+case_wall_thickness+cutout],center );
+        draw_cube(x_location+(CE_spec_tolerance/2),y_location+(CE_spec_tolerance/2),z_location, length+CE_spec_tolerance,width,thickness+case_wall_thickness+cutout,center);
     }
 }
-module 96BoardMountHoles(penetration){
+module MountHoles(penetration){
     z_loc = (penetration == true)?-1*(case_wall_thickness+(CE_spec_tolerance/2)+(board_top_clearance_extra_tolerance/2)+cutout+.01):0;
 
-    96BoardMountHole(mount_hole_1_x+(CE_spec_tolerance/2),mount_hole_1_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
-    96BoardMountHole(mount_hole_2_x+(CE_spec_tolerance/2),mount_hole_2_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
-    96BoardMountHole(mount_hole_3_x+(CE_spec_tolerance/2),mount_hole_3_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
-    96BoardMountHole(mount_hole_4_x+(CE_spec_tolerance/2),mount_hole_4_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+    MountHole(mount_hole_1_x+(CE_spec_tolerance/2),mount_hole_1_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+    MountHole(mount_hole_2_x+(CE_spec_tolerance/2),mount_hole_2_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+    MountHole(mount_hole_3_x+(CE_spec_tolerance/2),mount_hole_3_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+    MountHole(mount_hole_4_x+(CE_spec_tolerance/2),mount_hole_4_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
     if (96Boards_CE_extended_version == true){
-        96BoardMountHole(mount_hole_5_x+(CE_spec_tolerance/2),mount_hole_5_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
-        96BoardMountHole(mount_hole_6_x+(CE_spec_tolerance/2),mount_hole_6_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+        MountHole(mount_hole_5_x+(CE_spec_tolerance/2),mount_hole_5_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
+        MountHole(mount_hole_6_x+(CE_spec_tolerance/2),mount_hole_6_y+(CE_spec_tolerance/2),z_loc, hole_size, penetration);
     }
 }
-module 96BoardMountHole(x_location, y_location, z_location, size, penetration ){
+module MountHole(x_location, y_location, z_location, size, penetration ){
     
     mount_cylinder(x_location, y_location, z_location, size, penetration);
 }
 
-module mount_cylinder(x_location, y_location, z_location, size, penetration){
+module mount_cylinder(x, y, z, size, penetration){
     // Since this makes a model to diff from the external case have to add extra length to fully penetrate
     // the case
     union() {
         color("green")
-        translate([x_location, y_location, z_location])
-        cylinder(penetration != true?bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance:bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)+cutout, d = size, false, $fn=smoothness);
+        translate([x * x_scaler, y * y_scaler, z * z_scaler])
+        cylinder(penetration != true?(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance) * z_scaler:(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)+cutout)*z_scaler, d = size, false, $fn=smoothness);
         if (screw_terminator == true && penetration == true){
             color("Indigo")
-            translate([x_location,y_location,z_location])
-            cylinder(nut_hight, r=nut_size/2, $fn=nut_type);    // nut
+            translate([x * x_scaler, y * y_scaler, z * z_scaler])
+            cylinder(nut_hight * z_scaler, r=nut_size/2, $fn=nut_type);    // nut
             color("green")
-            translate([x_location,y_location,z_location-cutout])
-            cylinder(cutout, r=nut_size/2, $fn=nut_type);  // nut
+            translate([x * x_scaler, y * y_scaler, (z-cutout) * z_scaler])
+            cylinder(cutout * z_scaler, r=nut_size/2, $fn=nut_type);  // nut
         }
         if (screw_taper == true && penetration == true) {
             color("Indigo")
-            translate([x_location,y_location,((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)-screw_taper_height)])
-            cylinder(screw_taper_height, r1=(size/2), r2=(size/2)+1.5, $fn=smoothness);  // screw taper
+            translate([x * x_scaler, y * y_scaler,(((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)-screw_taper_height))*z_scaler])
+            cylinder(screw_taper_height * z_scaler, r1=(size/2), r2=(size/2)+1.5, $fn=smoothness);  // screw taper
             color("red")
-            translate([x_location,y_location,bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance])
-            cylinder(cutout, r1=(size/2)+1.5, r2=(size/2)+1.5, $fn=smoothness);
+            translate([x * x_scaler, y * y_scaler,(bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)*z_scaler])
+            cylinder(cutout * z_scaler, r1=(size/2)+1.5, r2=(size/2)+1.5, $fn=smoothness);
     
         }
     }
 }
+
 module 96BoardOuterCase(){
     if (rounded_case != true){
-        translate(0,0,0);
-        cube([board_length+CE_spec_tolerance+(case_wall_thickness*2),bd_width+CE_spec_tolerance+(case_wall_thickness*2),bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)],false);
+        draw_cube(0,0,0,
+        board_length+CE_spec_tolerance+(case_wall_thickness*2),bd_width+CE_spec_tolerance+(case_wall_thickness*2),bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2),false);
     } else {
-        translate([(board_length+CE_spec_tolerance+(case_wall_thickness*2))/2,((bd_width+CE_spec_tolerance+(case_wall_thickness*2))/2),((bd_total_thickness+(case_wall_thickness*2))/2)])
-        roundedBox([board_length+CE_spec_tolerance+(case_wall_thickness*2), bd_width+CE_spec_tolerance+(case_wall_thickness*2), bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)], 5, only_rectangle_rounded, $fn=smoothness);
+        draw_roundedBox((board_length+CE_spec_tolerance+(case_wall_thickness*2))/2,((bd_width+CE_spec_tolerance+(case_wall_thickness*2))/2),((bd_total_thickness+(case_wall_thickness*2))/2),
+        board_length+CE_spec_tolerance+(case_wall_thickness*2), bd_width+CE_spec_tolerance+(case_wall_thickness*2), bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2), 5, only_rectangle_rounded);
     }
 } 
 module 96BoardBlock(penetration){
     96BoardBare(penetration);
     // Total footprint space consumed by 96Board
     difference() {
-        cube([board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance],false);
+        draw_cube(0,0,0, board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance,false);
         96BoardStandoffMounts();
         };
       // This will cut the 96Board logo in the case top, not really useful as the centers of letters will just fall in.       
@@ -320,8 +322,8 @@ module 96BoardBare(penetration){
     // 96CE Board with connectors on it that stick out far enough to subtract from a case black
     union() {
         color( "orange" )
-        translate([0,0,board_bottom_clearance])
-        cube([board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,board_thickness],false);
+        draw_cube(0,0,board_bottom_clearance,
+        board_length+CE_spec_tolerance,bd_width+CE_spec_tolerance,board_thickness,false);
         translate([0,0,0]){    
             // USB_Host_Connectors
             color( "DarkTurquoise" )
@@ -382,10 +384,10 @@ module 96BoardBare(penetration){
             // UART_Board_Button
             if (expose_UART_Board_Button == true && 96Board_UART_Board_Installed == true){
                 color("DodgerBlue")
-                translate([uart_board_button_x_offset, uart_board_button_center_y_offset, uart_board_top_surface])
-                cylinder((bd_total_thickness+case_wall_thickness+cutout)-uart_board_top_surface, d=hole_size, $fn=smoothness);
+                translate([uart_board_button_x_offset * x_scaler, uart_board_button_center_y_offset * y_scaler, uart_board_top_surface * z_scaler])
+                cylinder(((bd_total_thickness+case_wall_thickness+cutout)-uart_board_top_surface)* z_scaler, d=hole_size, $fn=smoothness);
             }
-           96BoardMountHoles(penetration);
+           MountHoles(penetration);
         }
     }
 }
@@ -416,6 +418,17 @@ if (case == true ){
 }
 
 
+
+module draw_cube(x, y, z, length, width, thickness, center){
+    // Apply the scalers to cubes
+    translate([x * x_scaler,y * y_scaler,z * z_scaler])
+    cube([length * x_scaler, width * y_scaler, thickness * z_scaler], center);
+}
+
+module draw_roundedBox(x , y, z, length, width, thickness, radius, sidesonly){
+    translate([x * x_scaler,y * y_scaler,z * z_scaler])
+    roundedBox([length * x_scaler, width * y_scaler, thickness * z_scaler], radius, sidesonly, $fn=smoothness);
+}
 
 // WARNING WARNING WARNING the code below here was auto-generated to 
 // generate the 96Boards Logo
