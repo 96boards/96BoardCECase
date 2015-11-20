@@ -41,14 +41,14 @@ case_wall_thickness = 2.5;
 96Boards_CE_extended_version = false;
 
 // Do you have a UART board and want room to install it in the case?
-96Board_UART_Board_Installed = true; 
+96Board_UART_Board_Installed = false; 
 
 // The UART board has a reset button, if you want to be able to press it true
 expose_UART_Board_Button = true;
 
 // expose the low/high speeo0id connectors or not true/false question
 expose_low_speed_connector = true;
-expose_high_speed_connector = false;
+expose_high_speed_connector = true;
 expose_DragonBoardDipSwitch = true;
 
 // Do I want screw holes through the case? true/false question
@@ -71,9 +71,9 @@ slice_top = true;
 // .998 vs positive scaling 1.03 for each direction each printer has it's own thing.
 // If the case is bigger then it needs to be but the board fits I'd leave it alonw, this is really needed
 // if the case is too small
-x_scaler = 1.0;
-y_scaler = 1.0;
-z_scaler = 1.0;
+x_scalar = 1.0;
+y_scalar = 1.0;
+z_scalar = 1.0;
 
 // How round do you want holes  the higher it set to the longer it takes to render
 smoothness = 50; //10-100
@@ -275,23 +275,23 @@ module mount_cylinder(x, y, z, size, penetration){
     // the case
     union() {
         color("green")
-        translate([x * x_scaler, y * y_scaler, z * z_scaler])
-        cylinder(penetration != true?(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance) * z_scaler:(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)+cutout)*z_scaler, d = size, false, $fn=smoothness);
+        translate([x * x_scalar, y * y_scalar, z * z_scalar])
+        cylinder(penetration != true?(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance) * z_scalar:(bd_total_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance+(case_wall_thickness*2)+cutout)*z_scalar, d = size, false, $fn=smoothness);
         if (screw_terminator == true && penetration == true){
             color("Indigo")
-            translate([x * x_scaler, y * y_scaler, z * z_scaler])
-            cylinder(nut_hight * z_scaler, r=nut_size/2, $fn=nut_type);    // nut
+            translate([x * x_scalar, y * y_scalar, z * z_scalar])
+            cylinder(nut_hight * z_scalar, r=nut_size/2, $fn=nut_type);    // nut
             color("green")
-            translate([x * x_scaler, y * y_scaler, (z-cutout) * z_scaler])
-            cylinder(cutout * z_scaler, r=nut_size/2, $fn=nut_type);  // nut
+            translate([x * x_scalar, y * y_scalar, (z-cutout) * z_scalar])
+            cylinder(cutout * z_scalar, r=nut_size/2, $fn=nut_type);  // nut
         }
         if (screw_taper == true && penetration == true) {
             color("Indigo")
-            translate([x * x_scaler, y * y_scaler,(((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)-screw_taper_height))*z_scaler])
-            cylinder(screw_taper_height * z_scaler, r1=(size/2), r2=(size/2)+1.5, $fn=smoothness);  // screw taper
+            translate([x * x_scalar, y * y_scalar,(((bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)-screw_taper_height))*z_scalar])
+            cylinder(screw_taper_height * z_scalar, r1=(size/2), r2=(size/2)+1.5, $fn=smoothness);  // screw taper
             color("red")
-            translate([x * x_scaler, y * y_scaler,(bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)*z_scaler])
-            cylinder(cutout * z_scaler, r1=(size/2)+1.5, r2=(size/2)+1.5, $fn=smoothness);
+            translate([x * x_scalar, y * y_scalar,(bd_total_thickness+case_wall_thickness+CE_spec_tolerance+board_top_clearance_extra_tolerance)*z_scalar])
+            cylinder(cutout * z_scalar, r1=(size/2)+1.5, r2=(size/2)+1.5, $fn=smoothness);
     
         }
     }
@@ -384,8 +384,8 @@ module 96BoardBare(penetration){
             // UART_Board_Button
             if (expose_UART_Board_Button == true && 96Board_UART_Board_Installed == true){
                 color("DodgerBlue")
-                translate([uart_board_button_x_offset * x_scaler, uart_board_button_center_y_offset * y_scaler, uart_board_top_surface * z_scaler])
-                cylinder(((bd_total_thickness+case_wall_thickness+cutout)-uart_board_top_surface)* z_scaler, d=hole_size, $fn=smoothness);
+                translate([uart_board_button_x_offset * x_scalar, uart_board_button_center_y_offset * y_scalar, uart_board_top_surface * z_scalar])
+                cylinder(((bd_total_thickness+case_wall_thickness+cutout)-uart_board_top_surface)* z_scalar, d=hole_size, $fn=smoothness);
             }
            MountHoles(penetration);
         }
@@ -420,14 +420,14 @@ if (case == true ){
 
 
 module draw_cube(x, y, z, length, width, thickness, center){
-    // Apply the scalers to cubes
-    translate([x * x_scaler,y * y_scaler,z * z_scaler])
-    cube([length * x_scaler, width * y_scaler, thickness * z_scaler], center);
+    // Apply the scalars to cubes
+    translate([x * x_scalar,y * y_scalar,z * z_scalar])
+    cube([length * x_scalar, width * y_scalar, thickness * z_scalar], center);
 }
 
 module draw_roundedBox(x , y, z, length, width, thickness, radius, sidesonly){
-    translate([x * x_scaler,y * y_scaler,z * z_scaler])
-    roundedBox([length * x_scaler, width * y_scaler, thickness * z_scaler], radius, sidesonly, $fn=smoothness);
+    translate([x * x_scalar,y * y_scalar,z * z_scalar])
+    roundedBox([length * x_scalar, width * y_scalar, thickness * z_scalar], radius, sidesonly, $fn=smoothness);
 }
 
 // WARNING WARNING WARNING the code below here was auto-generated to 
