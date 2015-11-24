@@ -30,7 +30,7 @@ use <MCAD/boxes.scad>
 // Square edge case or rounded edge case?
 rounded_case = true;
 // Only the rectangle of the case rounded (sides) or all angles (top, bottom, sides)  
-only_rectangle_rounded = false;
+only_rectangle_rounded = true;
 
 // How thick do you want your case walls(in mm)
 // Be careful if you are setting rounded_case true, too thin of walls will leave holes
@@ -41,14 +41,14 @@ case_wall_thickness = 2.5;
 96Boards_CE_extended_version = false;
 
 // Do you have a UART board and want room to install it in the case?
-96Board_UART_Board_Installed = false; 
+96Board_UART_Board_Installed = true; 
 
 // The UART board has a reset button, if you want to be able to press it true
 expose_UART_Board_Button = true;
 
 // expose the low/high speeo0id connectors or not true/false question
 expose_low_speed_connector = true;
-expose_high_speed_connector = true;
+expose_high_speed_connector = false;
 expose_DragonBoardDipSwitch = true;
 
 // Do I want screw holes through the case? true/false question
@@ -60,9 +60,9 @@ screw_terminator = true;
 
 // For exporting .stl models, this will cut the model in 1/2 at the board top level.
 // The board will fit into the bottom of the case cleanly and the top will sit on it
-slice = false;
+slice = true;
 // top of the box or bottom 
-slice_top = true;
+slice_top = false;
 
 // turns out each 3D printer prints a little differently and that can make a board not fit the case
 // so to be safe print out a 85x54x5 rectangle or a 100x85x5 rectangle depending on what size case 
@@ -76,10 +76,10 @@ y_scalar = 1.0;
 z_scalar = 1.0;
 
 // How round do you want holes  the higher it set to the longer it takes to render
-smoothness = 50; //10-100
+smoothness = 200; //10-200
 
-// For development only do you want to see the full case, the full diff model or the bare board model can help when adding new case type
-// Set true for final case, false shows you the board and screw layout
+// For development only: if you want to see the full case, the full diff model or the bare board model. The full diff model and the bare board model can help when adding new case type.  
+// Set case=true for final case; false shows you the board and screw layout
 case = true;
 96BoardBlock = true;
 
